@@ -6,12 +6,13 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import morphology
-from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.metrics import accuracy_score
+
+from skimage import morphology. #for measuring things in the masks
+from sklearn.model_selection import StratifiedShuffleSplit #for cross-validation
+from sklearn.metrics import accuracy_score. #for measuring performance
 
 
-import fyp2021p3_group00_functions as util
+import fyp2021p3_group00_functions as util #custom-made functions with e.g. kNN classifier, you can also use sklearn
 
 file_data = 'data/example_ground_truth.csv'
 path_image = 'data/example_image'
@@ -23,7 +24,7 @@ file_features = 'features/features.csv'
 
 df = pd.read_csv(file_data)
 
-
+# Extract image IDs and labels from the data
 image_id = list(df['image_id'])
 is_melanoma = np.array(df['melanoma'])
 is_keratosis = np.array(df['seborrheic_keratosis'])
@@ -31,11 +32,13 @@ is_keratosis = np.array(df['seborrheic_keratosis'])
 
 num_images = len(image_id)
 
+#Make empty arrays to store features
 features_area = np.empty([num_images,1])
 features_area[:] = np.nan
 features_perimeter = np.empty([num_images,1])
 features_perimeter[:] = np.nan
 
+#Loop through all images
 for i in np.arange(num_images):
     
     # Define filenames related to this image
@@ -46,7 +49,7 @@ for i in np.arange(num_images):
     im = plt.imread(file_image)
     mask = plt.imread(file_mask)
     
-    # Measure features
+    # Measure features (custom made function)
     a, p = util.measure_area_perimeter(mask)
     
     # Store in the variables we created before
@@ -109,9 +112,10 @@ for train_index, test_val_index in kf.split(x, y):
     x_train, x_val, x_test = x[train_index], x[val_index], x[test_index]
     y_train, y_val, y_test = y[train_index], y[val_index], y[test_index]
     
-      
+    # Train and test custom-made kNN classifier. In sklearn you would do this with three steps, fit(x_train, y_train), predict(x_val), predict(x_test)
     y_pred_val, y_pred_test = util.knn_classifier(x_train, y_train, x_val, x_test, k)
     
+    # Calculate accuracy
     acc_val[index_fold] = accuracy_score(y_val,y_pred_val)
     acc_test[index_fold] = accuracy_score(y_test,y_pred_test)
    
